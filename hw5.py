@@ -4,9 +4,9 @@ Metadata = Dict[int, Tuple[str, str]]
 FileSizes = Dict[int, int]
 DirContent = Dict[int, List[int]]
 
-# I want to thank zou for your good reviews
-# it really helped me to understand recursion properly
-# and use it in right way in hw6
+# I want to thank you for your good reviews throughout the semester
+# this one really helped me to understand more properly recursion
+# and using it in right way in hw6.
 
 
 class Node:
@@ -33,7 +33,7 @@ class Node:
         # no directory contains two nodes with the same name
         return self.is_valid_child(root.children)
 
-    def find_root(self, root) -> 'Node':
+    def find_root(self, root: 'Node') -> 'Node':
         if root is not None:
             while root.parent is not None:
                 root = root.parent
@@ -59,7 +59,6 @@ class Node:
         return True
 
     def draw(self) -> None:
-        body: List[str] = []
         # start with printing current file
         print('-- ' + self.name)
 
@@ -68,7 +67,8 @@ class Node:
         if self.children:
             self.draw_body(self.children, count=0, space='')
 
-    def draw_body(self, children: List['Node'], count, space) -> List[str]:
+    def draw_body(self, children: List['Node'],
+                  count: int, space: str) -> None:
 
         space_dir = '    '
         tab = '   |'
@@ -102,7 +102,7 @@ class Node:
         # empty path
         return '/'
 
-    def find_path(self, node, path):
+    def find_path(self, node: 'Node', path: str) -> str:
         # BASE
         if node.parent is None:
             return path
@@ -121,9 +121,9 @@ class Node:
         disk_info = self.disk_traverse(self, [])
         return (disk_info[0], sum(disk_info[1]))
 
-    def disk_traverse(self, parent: 'Node', size) -> Tuple[int, int]:
-        # BASE
-        # if parent is a file
+    def disk_traverse(self, parent: 'Node',
+                      size: List[int]) -> Tuple[int, List[int]]:
+        # BASE, if parent is a file
         if not parent.is_dir:
             return (1, [parent.size])
         for child in parent.children:
@@ -404,32 +404,34 @@ def test_example() -> None:
         {-2: 0, 420: 420},
         {-1: [0, 1], 1: [-2, 420], 2: [-1]})
     # root_disk.draw()
-    print(root_disk.disk_usage())
+    # print(root_disk.disk_usage())
 
     root = build_fs(
-        {-91: ('usr', 'leela'), -79: ('.XCompose', 'fry'), -6: ('', 'fry'), -45:
-         ('mnt', 'amy'), -7: ('run', 'leela')},
-        {-79: 1337},
+        {-91: ('usr', 'leela'), -79: ('.XCompose', 'fry'),
+         -6: ('', 'fry'), -45: ('mnt', 'amy'),
+         -7: ('run', 'leela')}, {-79: 1337},
         {-45: [], -91: [-45], -6: [-7], -7: [-91, -79]})
-    print(root.disk_usage())
+    # print(root.disk_usage())
 
     root = build_fs(
-        {-1: ('root', 'fry'), 21: ('mnt', 'fry'), -15: ('list_nice.txt', 'amy'),
-         25: ('root', 'amy'), 94: ('', 'fry'), -85: ('mnt', 'fry'), -62: ('mnt',
-                                                                          'bender'), 48: ('var', 'amy'), -30: ('.XCompose', 'bender'), -52:
-            ('list_naughty.txt', 'bender'), 54: ('bin', 'amy'), 1: ('mnt', 'bender'), -58:
-            ('list_nice.txt', 'leela'), -57: ('root', 'bender'), 3: ('bin', 'bender'), 15:
-            ('mnt', 'leela'), -61: ('var', 'amy'), 80: ('var', 'fry'), 43: ('mnt', 'amy'),
-            -76: ('bin', 'fry'), 68: ('var', 'amy'), 99: ('root', 'fry'), -40: ('run',
-                                                                                'leela'), -31: ('run', 'amy'), 91: ('mnt', 'leela'), 63: ('var', 'leela'), -72:
-            ('usr', 'leela'), 61: ('mnt', 'bender'), 77: ('var', 'leela'), -51: ('bin',
-                                                                                 'fry'), 8: ('bin', 'fry')},
+        {-1: ('root', 'fry'), 21: ('mnt', 'fry'),
+         -15: ('list_nice.txt', 'amy'), 25: ('root', 'amy'),
+         94: ('', 'fry'), -85: ('mnt', 'fry'), -62: ('mnt', 'bender'),
+         48: ('var', 'amy'), -30: ('.XCompose', 'bender'),
+         -52: ('list_naughty.txt', 'bender'), 54: ('bin', 'amy'),
+         1: ('mnt', 'bender'), -58: ('list_nice.txt', 'leela'),
+         -57: ('root', 'bender'), 3: ('bin', 'bender'), 15: ('mnt', 'leela'),
+         -61: ('var', 'amy'), 80: ('var', 'fry'), 43: ('mnt', 'amy'),
+         -76: ('bin', 'fry'), 68: ('var', 'amy'), 99: ('root', 'fry'),
+         -40: ('run', 'leela'), -31: ('run', 'amy'), 91: ('mnt', 'leela'),
+         63: ('var', 'leela'), -72: ('usr', 'leela'), 61: ('mnt', 'bender'),
+         77: ('var', 'leela'), -51: ('bin', 'fry'), 8: ('bin', 'fry')},
         {-58: 420, -52: 0, -15: 1337, -30: 1337},
-        {-40: [15, 77], 54: [48, 91], 80: [-15, -52], -62: [68, 21], 43: [], 1:
-         [-58, -57], -61: [-1, -76], -51: [99, -31], 61: [], 25: [-72, 61], 63: [-85,
-                                                                                 3], -85: [], 8: [-30, 43], -76: [-40, 54], -1: [-62, 63], -72: [], -31: [8,
-                                                                                                                                                          25], 99: [80, 1], 94: [-61, -51], -57: []})
-    print(root.all_owners())
+        {-40: [15, 77], 54: [48, 91], 80: [-15, -52], -62: [68, 21], 43: [],
+         1: [-58, -57], -61: [-1, -76], -51: [99, -31], 61: [], 25: [-72, 61],
+         63: [-85, 3], -85: [], 8: [-30, 43], -76: [-40, 54], -1: [-62, 63],
+         -72: [], -31: [8, 25], 99: [80, 1], 94: [-61, -51], -57: []})
+    # print(root.all_owners())
 
     """
     root_owners = root = build_fs(
@@ -447,9 +449,9 @@ def test_example() -> None:
                           0: ('0', 'root'), 1: ('.', 'root'),
                           4: ('terion', 'liba'),
                           420: ('bakelyt', 'frantik'),
-                          520: ('sumatra', 'frantik'), 244: ('kokot', 'o')},
-                         {520: 12312032139}, {-1: [0, 1, 420], 1: [4, 520], 420: [244]})
-
+                          520: ('sumatra', 'frantik'), 244: ('labuznik', 'o')},
+                         {520: 12312032139}, {-1: [0, 1, 420],
+                         1: [4, 520], 420: [244]})
     root_keep.add_keep_files(2)
 
     root_keep.draw()
