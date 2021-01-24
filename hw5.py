@@ -77,10 +77,9 @@ class Node:
         if count > 0:
             space += space_dir
         count += 1
-        # print(count)
         for i, child in enumerate(children):
 
-            # jedna se o posledni soubor?
+            # last file?
             if i == len(children) - 1:
                 print(space + end_tab + '-- ' + child.name)
             else:
@@ -118,9 +117,7 @@ class Node:
     # BASE: current node is a file
     # STEP: search for a files (in childrens),
     # we are closer to the point where there are no childrens
-
     def disk_usage(self) -> Tuple[int, int]:
-
         disk_usage = self.disk_traverse(self, [])
 
         return disk_usage
@@ -137,13 +134,12 @@ class Node:
 
         return (len(size), sum(size))
 
-    # return a set of all owners (from a current node)
+    # return a set of all owners (all nodes from a current node (including))
     # BASE:
+    # STEP: getting closer to the node without children
     def all_owners(self) -> Set[str]:
-        owners = set()
-
-        # start with a current file owner
-        return self.owners_traverse(self, owners)
+        # start with a current file owner and empty set
+        return self.owners_traverse(self, set())
 
     def owners_traverse(self, parent: 'Node', owners: Set[str]) -> Set[str]:
         owners.add(self.owner)
@@ -156,25 +152,21 @@ class Node:
                 self.owners_traverse(child, owners)
         return owners
 
+    # return list of all empty files from current node
+    # BASE: current node is an empty file
+    # STEP: getting closer to the node without children
     def empty_files(self) -> List['Node']:
-        empty_fl: List[Node] = []
-        # current node is a file and size is empty -> [file]
-        if not self.is_dir and self.size == 0:
-            return [self]
-        # traverse through the list of parents of current node
-        for child in self.children:
-            self.search_empty(child, empty_fl)
-        return empty_fl
+        return self.search_empty(self, [])
 
     def search_empty(self, parent: 'Node',
                      empty_fl: List['Node']) -> List['Node']:
-        # if current parrent is not dir
+        # BASE, empty file
         if not parent.is_dir and parent.size == 0:
             empty_fl.append(parent)
+        # traverse through the list of parents of current node
         for child in parent.children:
-            if not child.is_dir:
-                if child.size == 0:
-                    empty_fl.append(child)
+            if not child.is_dir and child.size == 0:
+                empty_fl.append(child)
             else:
                 self.search_empty(child, empty_fl)
         return empty_fl
@@ -424,7 +416,7 @@ def test_example() -> None:
         {-79: 1337},
         {-45: [], -91: [-45], -6: [-7], -7: [-91, -79]})
     print(root.disk_usage())
-    """
+
     root = build_fs(
         {-1: ('root', 'fry'), 21: ('mnt', 'fry'), -15: ('list_nice.txt', 'amy'),
          25: ('root', 'amy'), 94: ('', 'fry'), -85: ('mnt', 'fry'), -62: ('mnt',
@@ -443,6 +435,7 @@ def test_example() -> None:
                                                                                                                                                           25], 99: [80, 1], 94: [-61, -51], -57: []})
     print(root.all_owners())
 
+    """
     root_owners = root = build_fs(
         {64: ('mnt', 'leela'), 21: ('mnt', 'amy'), 84: ('root', 'bender'), 46:
          ('', 'leela'), -12: ('bin', 'amy')}, {},
