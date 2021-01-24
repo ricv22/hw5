@@ -105,16 +105,16 @@ class Node:
         # empty path
         return '/'
 
-    def find_path(self, node, a):
+    def find_path(self, node, path):
         # BASE
         if node.parent is None:
-            return a
-        # building path
-        node.name = "/" + node.name
-        node.name += a
-        a = node.name
+            return path
+        # building path, root will be first
+        current_node = "/" + node.name
+        current_node += path
+        path = current_node
         # STEP
-        return self.find_path(node.parent, a)
+        return self.find_path(node.parent, path)
 
     def disk_usage(self) -> Tuple[int, int]:
         count = 0
@@ -606,6 +606,7 @@ def test_example() -> None:
     assert root.empty_files() == [empty]
 
     root.prepend_owner_name()
+    print(python.name)
     assert python.name == 'root_python'
     assert empty.name == 'user_.timestamp'
     # print(root.children[0].children[2].name)
