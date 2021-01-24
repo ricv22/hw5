@@ -90,10 +90,8 @@ class Node:
                 self.draw_body(child.children, count, space)
 
     # return full path to current node
-    # BASE: current directory
-
+    # BASE: current directory is None
     # STEP: getting closer to the root
-
     def full_path(self) -> str:
         current_node = self
         if current_node.parent is not None:
@@ -113,64 +111,49 @@ class Node:
         current_node = "/" + node.name
         current_node += path
         path = current_node
-        # STEP
+        # STEP, node.parent
         return self.find_path(node.parent, path)
 
+    # return (number of files, sum of all file sizes)
+    # BASE: current node is a file
+    # STEP: search for a files (in childrens),
+    # we are closer to the point where there are no childrens
+
     def disk_usage(self) -> Tuple[int, int]:
-        count = 0
-        size = 0
-        if not self.is_dir:
-            count += 1
-            size += self.size
 
-        for child in self.children:
-            folder = self.disk_traverse(child)
-            size += folder[1]
-            count += folder[0]
+        disk_usage = self.disk_traverse(self, [])
 
-        return (count, size)
+        return disk_usage
 
-    def disk_traverse(self, parent: 'Node') -> Tuple[int, int]:
-        count_files = 0
-        size_files = 0
+    def disk_traverse(self, parent: 'Node', size) -> Tuple[int, int]:
+        # BASE
         # if parent is a file
         if not parent.is_dir:
             return (1, parent.size)
         for child in parent.children:
-            if not child.is_dir:
-                count_files += 1
-                size_files += child.size
+            # STEP, child
+            size.append(self.disk_traverse(child, [])[1])
             # when child.children is not empty
-            elif child.children:
-                return self.disk_traverse(child)
-        return (count_files, size_files)
 
+        return (len(size), sum(size))
+
+    # return a set of all owners (from a current node)
+    # BASE:
     def all_owners(self) -> Set[str]:
-        # pridam owner pocatecniho souboru do mnoziny owners
-        # prohledavam self.children:
-        # pridame owner do mnoziny owners
-        # kdyz je to adresar zanorim se, a znovu
-
-        # vratim mnozinu
         owners = set()
+
         # start with a current file owner
-        owners.add(self.owner)
-        for child in self.children:
-            owners.add(child.owner)
-            owners.union(self.owners_traverse(child, owners))
-        return owners
+        return self.owners_traverse(self, owners)
 
     def owners_traverse(self, parent: 'Node', owners: Set[str]) -> Set[str]:
+        owners.add(self.owner)
         # owners.add(self.owner)
         # print(parent.nid)
         for child in parent.children:
             # when child is empty folder of file
-            if not child.children:
-                owners.add(child.owner)
-            elif child.is_dir:
-                owners.add(child.owner)
-                return self.owners_traverse(child, owners)
             owners.add(child.owner)
+            if child.is_dir:
+                self.owners_traverse(child, owners)
         return owners
 
     def empty_files(self) -> List['Node']:
@@ -434,6 +417,14 @@ def test_example() -> None:
     root_disk.draw()
     print(root_disk.disk_usage())
     """
+
+    root = build_fs(
+        {-91: ('usr', 'leela'), -79: ('.XCompose', 'fry'), -6: ('', 'fry'), -45:
+         ('mnt', 'amy'), -7: ('run', 'leela')},
+        {-79: 1337},
+        {-45: [], -91: [-45], -6: [-7], -7: [-91, -79]})
+    print(root.disk_usage())
+    """
     root = build_fs(
         {-1: ('root', 'fry'), 21: ('mnt', 'fry'), -15: ('list_nice.txt', 'amy'),
          25: ('root', 'amy'), 94: ('', 'fry'), -85: ('mnt', 'fry'), -62: ('mnt',
@@ -476,7 +467,7 @@ def test_example() -> None:
     # print()
     # print(root_keep.children[1].children[0].children[0].nid)
     # assert len(root_keep.children[1].children) == 1
-
+    """
     root_testA = root = build_fs(
         {1: ('', '')},
         {},
@@ -487,8 +478,10 @@ def test_example() -> None:
 
     root_test = example_fs()
     # print(root_test.children[0].children[0].full_path())
+    print(root_test.children[0].disk_usage())
     assert root_test.children[0].disk_usage() == (3, 1084040)
 
+    print(root_test.children[0].children[0].disk_usage())
     assert root_test.children[0].children[0].disk_usage() == (1, 141936)
 
     assert len(root_test.children[0].children[2].empty_files()) == 0
@@ -593,10 +586,12 @@ def test_example() -> None:
 
     assert python.full_path() == '/bin/python'
     assert ib111.children[0].full_path() == '/home/user/ib111/reviews/'
-
+    """
+    print(root.disk_usage())
     assert root.disk_usage() == (8, 1210022)
     assert home.disk_usage() == (4, 78326)
-
+    """
+    print(root.all_owners())
     assert root.all_owners() == {'nobody', 'user', 'root'}
     assert home.all_owners() == {'user', 'root'}
     assert python.all_owners() == {'root'}
