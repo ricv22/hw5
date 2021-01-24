@@ -89,21 +89,32 @@ class Node:
             if (child.is_dir and i == len(children) - 1) or child.is_dir:
                 self.draw_body(child.children, count, space)
 
+    # return full path to current node
+    # BASE: current directory
+
+    # STEP: getting closer to the root
+
     def full_path(self) -> str:
-        test: Optional['Node'] = self.parent
-        if test is not None:
-            if self.is_dir:
-                return self.find_path(test, '') + '/'
-            return self.find_path(test, '')
+        current_node = self
+        if current_node.parent is not None:
+            if current_node.is_dir:
+                full_path = self.find_path(current_node, '') + '/'
+                return full_path
+            full_path = self.find_path(current_node, '')
+            return full_path
         # empty path
         return '/'
 
-    def find_path(self, test, a):
-        print(a)
-        if test.parent is not None:
-            a += '/' + test.name
-            self.find_path(test.parent, a)
-        return a
+    def find_path(self, node, a):
+        # BASE
+        if node.parent is None:
+            return a
+        # building path
+        node.name = "/" + node.name
+        node.name += a
+        a = node.name
+        # STEP
+        return self.find_path(node.parent, a)
 
     def disk_usage(self) -> Tuple[int, int]:
         count = 0
@@ -159,8 +170,7 @@ class Node:
             elif child.is_dir:
                 owners.add(child.owner)
                 return self.owners_traverse(child, owners)
-            else:
-                owners.add(child.owner)
+            owners.add(child.owner)
         return owners
 
     def empty_files(self) -> List['Node']:
