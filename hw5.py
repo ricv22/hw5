@@ -118,21 +118,20 @@ class Node:
     # STEP: search for a files (in childrens),
     # we are closer to the point where there are no childrens
     def disk_usage(self) -> Tuple[int, int]:
-        disk_usage = self.disk_traverse(self, [])
-
-        return disk_usage
+        disk_info = self.disk_traverse(self, [])
+        return (disk_info[0], sum(disk_info[1]))
 
     def disk_traverse(self, parent: 'Node', size) -> Tuple[int, int]:
         # BASE
         # if parent is a file
         if not parent.is_dir:
-            return (1, parent.size)
+            return (1, [parent.size])
         for child in parent.children:
             # STEP, child
-            size.append(self.disk_traverse(child, [])[1])
+            # print(size)
+            size = size + self.disk_traverse(child, [])[1]
             # when child.children is not empty
-
-        return (len(size), sum(size))
+        return (len(size), size)
 
     # return a set of all owners (all nodes from a current node (including))
     # BASE:
@@ -143,12 +142,10 @@ class Node:
 
     def owners_traverse(self, parent: 'Node', owners: Set[str]) -> Set[str]:
         owners.add(self.owner)
-        # owners.add(self.owner)
-        # print(parent.nid)
         for child in parent.children:
-            # when child is empty folder of file
             owners.add(child.owner)
             if child.is_dir:
+                # STEP, child
                 self.owners_traverse(child, owners)
         return owners
 
@@ -400,15 +397,14 @@ def test_example() -> None:
     # MY TESTS #
     # root_test0 = build_fs({420: ('bor', 'br')}, {420: 420}, {})
     # root_test0.draw()
-    """
+
     root_disk = root = build_fs(
         {-2: ('0', '0'), -1: ('0', '0'), 0: ('0', '0'),
          1: ('.', '0'), 2: ('', '0'), 420: ('tyrek', 'rir')},
         {-2: 0, 420: 420},
         {-1: [0, 1], 1: [-2, 420], 2: [-1]})
-    root_disk.draw()
+    # root_disk.draw()
     print(root_disk.disk_usage())
-    """
 
     root = build_fs(
         {-91: ('usr', 'leela'), -79: ('.XCompose', 'fry'), -6: ('', 'fry'), -45:
@@ -579,11 +575,11 @@ def test_example() -> None:
 
     assert python.full_path() == '/bin/python'
     assert ib111.children[0].full_path() == '/home/user/ib111/reviews/'
-    """
+
     print(root.disk_usage())
     assert root.disk_usage() == (8, 1210022)
     assert home.disk_usage() == (4, 78326)
-    """
+
     print(root.all_owners())
     assert root.all_owners() == {'nobody', 'user', 'root'}
     assert home.all_owners() == {'user', 'root'}
